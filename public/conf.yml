@@ -1,0 +1,11 @@
+pageInfo:
+  title: 探长的云端启动页 ☁️
+  description: Cloudflare Pages 版本 Dashy
+
+sections:
+  - name: 常用
+    items:
+      - title: Google
+        url: https://www.google.com
+      - title: GitHub
+        url: https://github.com
