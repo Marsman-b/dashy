@@ -98,7 +98,12 @@
     log.info('正在加载默认配置文件:', CONFIG.DEFAULT_CONFIG_PATH);
 
     try {
-      const response = await fetch(CONFIG.DEFAULT_CONFIG_PATH);
+      // 使用原始 fetch，添加特殊标记避免被拦截
+      const response = await originalFetch(CONFIG.DEFAULT_CONFIG_PATH, {
+        headers: {
+          'X-Bypass-Adapter': 'true'
+        }
+      });
       if (response.ok) {
         const configText = await response.text();
         log.info('成功加载默认配置');
@@ -177,13 +182,17 @@
   window.fetch = function(...args) {
     const [resource, options] = args;
 
+    // 检查是否有绕过标记
+    const bypassAdapter = options && options.headers &&
+      (options.headers['X-Bypass-Adapter'] || options.headers['x-bypass-adapter']);
+
     // 检查是否是配置文件请求
     const isConfigRequest = typeof resource === 'string' &&
       (resource.endsWith('/conf.yml') ||
        resource.endsWith('user-data/conf.yml') ||
        resource.includes('/conf.yml?'));
 
-    if (isConfigRequest) {
+    if (isConfigRequest && !bypassAdapter) {
       log.info('拦截配置文件请求:', resource);
 
       // GET 请求 - 从 Worker 获取配置
